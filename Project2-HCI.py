@@ -18,11 +18,25 @@ def m2mi(m):
 def ms2mph(ms):
     return 3600 * m2mi(ms)
 
+def map_creator(latitude,longitude):
+    from streamlit_folium import folium_static
+    import folium
+
+    # center on the station
+    m = folium.Map(location=[latitude, longitude], zoom_start=10)
+
+    # add marker for the station
+    folium.Marker([latitude, longitude], popup="Station", tooltip="Station").add_to(m)
+
+    # call to render Folium map in Streamlit
+    folium_static(m)
+
 # streamlit structure below
 pageTitle = "Weather"
 st.set_page_config(
     page_title=pageTitle,
     menu_items={
+        "Get Help" : "https://docs.streamlit.io/",
         "About": "HCI Project 2"
     }
 )
@@ -113,6 +127,8 @@ else:
 
 currentWeatherStr = response["current"]["weather"][0]["description"]
 
+map_creator(lat,lon)
+
 temperatureUnit = st.selectbox("Select a unit of temperature", ["Fahrenheit", "Celsius"])
 
 # convert to selected unit and build strings
@@ -147,6 +163,8 @@ currentWindSpeedStr += " " + currentWindDirStr
 # all info should be available now, the rest of the app is below
 
 # display all possible information
+st.info("It is currently " + currentTempStr + " in " + cityShortName)
+
 st.write("Current Time: " + str(currentDateTime))
 st.write("Sunrise Today: " + str(sunriseToday))
 st.write("Sunset Today: " + str(sunsetToday))
