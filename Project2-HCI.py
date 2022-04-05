@@ -76,6 +76,11 @@ for i in range(len(city)):
         cityShortName += city[i]
         continue
     break
+
+map_checkbox = st.checkbox("Display Map of " + cityShortName)
+if map_checkbox:
+    map_creator(lat,lon)
+
 st.header("Statistics for " + cityShortName)
 
 # get response from openWeatherMap api
@@ -127,8 +132,6 @@ else:
 
 currentWeatherStr = response["current"]["weather"][0]["description"]
 
-map_creator(lat,lon)
-
 temperatureUnit = st.selectbox("Select a unit of temperature", ["Fahrenheit", "Celsius"])
 
 # convert to selected unit and build strings
@@ -169,7 +172,6 @@ st.write("Current Time: " + str(currentDateTime))
 st.write("Sunrise Today: " + str(sunriseToday))
 st.write("Sunset Today: " + str(sunsetToday))
 
-st.write("Current Temperature: " + currentTempStr)
 st.write("Feels Like: " + currentFeelsLikeStr)
 st.write("Dew Point: " + currentDewPointStr)
 
