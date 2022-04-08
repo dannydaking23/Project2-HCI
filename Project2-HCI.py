@@ -101,9 +101,17 @@ with c2:
     response = rq.get(apiURL).json()
 
     #parse response
-    currentDateTime = dt.datetime.fromtimestamp(response["current"]["dt"])
-    sunriseToday = dt.datetime.fromtimestamp(response["current"]["sunrise"])
-    sunsetToday = dt.datetime.fromtimestamp(response["current"]["sunset"])
+    utcTime = dt.datetime.utcnow()
+    systemTime = dt.datetime.now()
+    myOffset = systemTime.timestamp() - utcTime.timestamp()
+    realOffset = response["timezone_offset"] - myOffset
+
+    currentDateTime = dt.datetime.fromtimestamp(response["current"]["dt"] + realOffset)
+    currentDateTimeStr = currentDateTime.strftime("%I:%M %p")
+    sunriseToday = dt.datetime.fromtimestamp(response["current"]["sunrise"] + realOffset)
+    sunriseTodayStr = sunriseToday.strftime("%I:%M %p")
+    sunsetToday = dt.datetime.fromtimestamp(response["current"]["sunset"] + realOffset)
+    sunsetTodayStr = sunsetToday.strftime("%I:%M %p")
 
     currentTempKelvin = response["current"]["temp"]
     currentFeelsLikeKelvin = response["current"]["feels_like"]
@@ -216,12 +224,6 @@ with c2:
         link = '[Find out more.](https://www.epa.gov/sites/default/files/documents/uviguide.pdf)'
         st.markdown(link, unsafe_allow_html=True)
 
-    seeTime = st.checkbox("See Current Time, Sunrise, and Sunset")
-
-    if seeTime:
-        data = [{'Current Time': str(currentDateTime), 'Sunrise': str(sunriseToday), 'Sunset': str(sunsetToday)}]
-        st.dataframe(data)
-
 # TODO: get hourly forecast from response
 
 # all info should be available now, the rest of the app is below
@@ -245,6 +247,9 @@ with c1:
             .small-font {
                 font-size:3rem !important;
             }
+            .little-font {
+                font-size: 1.5rem !important;
+            }
             .my {
             line-height:1.1;
             }
@@ -256,24 +261,25 @@ with c1:
 
     st.markdown("""
         <div class='my' style='background:lightblue; padding:1rem; margin-bottom:1rem; border-radius:1rem'>
-            <span style='display:flex; align-items:center; margin:0; padding:0;'>
+             <span style='display:flex; align-items:center; margin:0; padding:0;'>
                 <p style='display: inline; margin:0; padding:0;' class='big-font'>""" + currentTempStr + """</p>
                 <img style='display: inline; margin:0; padding:0; width: 8rem; height: 8rem;' src='""" + iconSource + """' width='0' height='0'>
+                <div style='height:100%; width:100%;'>
+                    <p style='text-align: right;' class='small-font'>""" + currentDateTimeStr + """</p>
+                    <p style='text-align: right;' class='little-font'>
+                        Sunrise: """ + sunriseTodayStr + """</p>
+                    <p style='text-align: right;' class='little-font'>
+                        Sunset: """ + sunsetTodayStr + """
+                    </p>
+                </div>
             </span>
+            <p style='margin:0; padding:0;' class='little-font'>Feels like """ + currentFeelsLikeStr + """</p>
             <p style='margin:0; padding:0;' class='small-font'><i>""" + currentWeatherStr + """</i></p>
-            <p style='margin:0; padding:0;' class='small-font'>Feels like """ + currentFeelsLikeStr + """</p>
-            <p style='margin:0; padding:0;' class='small-font'>Humidity: """ + currentHumidityStr + """</p>
         </div>
         """, unsafe_allow_html=True)
 
     map_creator(lat,lon)
 
-    #st.write("Current Time: " + str(currentDateTime))
-    #st.write("Sunrise Today: " + str(sunriseToday))
-    #st.write("Sunset Today: " + str(sunsetToday))
-
-    #st.write("Current Temperature: " + currentTempStr)
-    #st.write("Feels Like: " + currentFeelsLikeStr)
     #st.write("Dew Point: " + currentDewPointStr)
 
     #st.write("Pressure: " + currentPressureStr)
@@ -285,3 +291,4 @@ with c1:
     #st.write("Visibility: " + currentVisibilityStr)
 
     #st.write("Weather Description: " + currentWeatherStr)
+
